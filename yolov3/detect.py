@@ -390,8 +390,8 @@ if __name__ == "__main__":
     weights = './weights/yolov3.pt'  # model.pt path(s)
     model = prepare_model(weights=weights)
 
-    IMAGES_PATH = '../gradio/images3/'
-    SAVE_DIR = '../gradio/predicted_images/'
+    IMAGES_PATH = '../webapp/images/images3/'
+    SAVE_DIR = '../webapp/images/predicted_images/'
     images = [os.path.join(IMAGES_PATH, file) for file in os.listdir(IMAGES_PATH)]
     for image in images:
         predict_image(source=image, model=model, SAVE_DIR=SAVE_DIR)

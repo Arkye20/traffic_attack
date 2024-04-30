@@ -1,12 +1,12 @@
 import numpy as np
 import torch
-from models.experimental import attempt_load
-from utils.general import xywh2xyxy
-from utils.datasets import letterbox
+from yolov3.models.experimental import attempt_load
+from yolov3.utils.general import xywh2xyxy
+from yolov3.utils.datasets import letterbox
 import time
 import torchvision
 import torch.nn as nn
-from utils.metrics import box_iou
+from yolov3.utils.metrics import box_iou
 
 
 class YOLOV3TorchObjectDetector(nn.Module):

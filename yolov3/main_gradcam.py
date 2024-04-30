@@ -5,8 +5,8 @@ import random
 import time
 import argparse
 import numpy as np
-from models.gradcam import YOLOV3GradCAM, YOLOV3GradCAMPP
-from models.yolo_detector import YOLOV3TorchObjectDetector
+from yolov3.models.gradcam import YOLOV3GradCAM, YOLOV3GradCAMPP
+from yolov3.models.yolo_detector import YOLOV3TorchObjectDetector
 import cv2
 # 从interface.py调用时,代码执行到这里时会调用项目根路径下的style_transfer导致报错,修改成yolov3包下的style_transfer
 from yolov3.style_transfer import load_img
@@ -27,13 +27,13 @@ target_layers = ['model_15_act', 'model_22_act', 'model_27_1_cv2_act']
 # Arguments
 parser = argparse.ArgumentParser(conflict_handler='resolve')
 
-if __name__ == '__main__':
-    parser.add_argument('--model-path', type=str, default="./weights/yolov3.pt", help='Path to the model')
-else:
-    parser.add_argument('--model-path', type=str, default="./yolov3/weights/yolov3.pt", help='Path to the model')
+# if __name__ == '__main__':
+#     parser.add_argument('--model-path', type=str, default="./weights/yolov3.pt", help='Path to the model')
+# else:
+parser.add_argument('--model-path', type=str, default="./yolov3/weights/yolov3.pt", help='Path to the model')
 
-parser.add_argument('--img-path', type=str, default='./yolov3/data/test', help='input image path')
-parser.add_argument('--output-dir', type=str, default='./yolov3/outputs/', help='output dir')
+parser.add_argument('--input', type=str, default='./yolov3/data/test', help='input image path')
+parser.add_argument('--output', type=str, default='./yolov3/outputs/', help='output dir')
 parser.add_argument('--img-size', type=int, default=640, help="input image size")
 parser.add_argument('--target-layer', type=str, default='model_15_act',
                     help='The layer hierarchical address to which gradcam will applied,'
@@ -157,15 +157,14 @@ def main(img_path,model, SAVE_DIR=None, attack_range=220):
 
 
 if __name__ == '__main__':
-    IMAGES_PATH = '../gradio/images/'
-    SAVE_DIR = '../gradio/gradcam_images/'
+    # IMAGES_PATH = '../images/images/'
+    # SAVE_DIR = '../images/gradcam_images/'
+
     device = args.device
     input_size = (args.img_size, args.img_size)
     model = YOLOV3TorchObjectDetector(args.model_path, device, img_size=input_size, names=names)
 
-    images = [os.path.join(IMAGES_PATH, file) for file in os.listdir(IMAGES_PATH)]
-    for image in images:
-        main(image, model, SAVE_DIR=SAVE_DIR)
+    main(img_path=args.input, model=model, SAVE_DIR=args.output, attack_range=220)
     # 图片路径为文件夹
     # if os.path.isdir(args.img_path):
     #     img_list = os.listdir(args.img_path)

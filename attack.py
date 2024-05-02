@@ -2,6 +2,9 @@ from __future__ import print_function
 
 import os
 
+import torch
+from torchvision.models import VGG19_Weights
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import sys
 
@@ -41,13 +44,6 @@ parser.add_argument("--attack_weight", dest='attack_weight', nargs='?', type=flo
                     help="weight of attack loss", default=5e3)
 parser.add_argument('--mode', type=str, default='disappeared', help='untargeted/targeted/disappeared')
 
-# 从interface.py调用4.py，通过下面的参数来传递信息
-parser.add_argument('--img', type=str, help='input image path')
-parser.add_argument('--style', type=str or None, help='style image path')
-parser.add_argument('--mask', type=str, help='mask image path')
-parser.add_argument('--patch', type=str, help='path to save patch image')
-parser.add_argument('--adv', type=str, help='path to save adv image')
-parser.add_argument('--det', type=str, help='path to save det image')
 
 args = parser.parse_args()
 
@@ -59,16 +55,20 @@ def main(
         MASK_IMAGE=None,  # mask图片路径
         PATCH_PATH=None,  # 最终补丁存储路径
         ADV_PATH=None,  # 最终对抗样本存储路径
-        DET_PATH=None  # 对抗样本检测效果存储路径
+        DET_PATH=None,  # 对抗样本检测效果存储路径
+        SAVE_PT=False   # 是否保存对抗样本张量
 ):
-    style_img_path = './yolov3/tie2.jpg' if STYLE_IMAGE is None else STYLE_IMAGE
-    # content_img_path = f'yolov3/data/test/{item}'
+    style_img_path = STYLE_IMAGE
     content_img_path = item  # 传入图片的绝对路径
-    imgae_name = os.path.basename(content_img_path)[:-4]
-    mask_path = f'yolov3/outputs/{imgae_name}/mask.jpg' if MASK_IMAGE is None else MASK_IMAGE  # 获取mask
-    patch_path = f'{args.output_dir}/patch/{imgae_name}.jpg' if PATCH_PATH is None else PATCH_PATH  # 最终补丁存储路径
-    save_path = f'{args.output_dir}/adv_img/{imgae_name}.jpg' if ADV_PATH is None else ADV_PATH  # 最终对抗样本存储路径
-    save_detpath = f'{args.output_dir}/det_img/{imgae_name}.jpg' if DET_PATH is None else DET_PATH  # 对抗样本检测效果存储路径
+    mask_path = MASK_IMAGE # 获取mask
+    patch_path = PATCH_PATH  # 最终补丁存储路径
+    save_path = ADV_PATH  # 最终对抗样本存储路径
+    save_detpath = DET_PATH  # 对抗样本检测效果存储路径
+
+    if SAVE_PT:
+        pt_basename = os.path.splitext(os.path.basename(save_path))[0] + ".pt"
+        pt_adv_save_path = os.path.join(os.path.dirname(save_path), pt_basename)
+        pt_patch_save_path = os.path.join(os.path.dirname(patch_path), pt_basename)
 
     num_epoches = 1000
 
@@ -91,7 +91,8 @@ def main(
     style_img = load_img(style_img_path, (loc[2], loc[3])).to(device)
 
     # 风格迁移模型
-    vgg = models.vgg19(pretrained=True).features
+    # vgg = models.vgg19(pretrained=True).features
+    vgg = models.vgg19(weights=VGG19_Weights.DEFAULT).features
     vgg = vgg.to(device)
     model, style_loss_list, content_loss_list = get_style_model_and_loss(style_img, content_img, vgg)
 
@@ -156,15 +157,23 @@ def main(
         elif (args.mode == 'disappeared'):
             if det is None:
                 # 攻击成功 保存图片
-                save_image(adv_image, save_path)
-                save_image(patch, patch_path)
+                if not SAVE_PT:
+                    save_image(adv_image, save_path)
+                    save_image(patch, patch_path)
+                else:
+                    torch.save(adv_image, pt_adv_save_path)
+                    torch.save(patch,pt_patch_save_path)
                 flag = 1
                 break
-            # if (11 not in det[:,6]) and len(det[:,6])<maxl:
-            #     save_image(adv_image, save_path)
-            #     save_image(patch, patch_path)
-            #     flag = 1
-            #     break
+            if (11 not in det[:,6]) and len(det[:,6])<maxl:
+                if not SAVE_PT:
+                    save_image(adv_image, save_path)
+                    save_image(patch, patch_path)
+                else:
+                    torch.save(adv_image, pt_adv_save_path)
+                    torch.save(patch,pt_patch_save_path)
+                flag = 1
+                break
 
             loss_det = torch.mean(max_prob_obj_cls)
 
@@ -186,8 +195,12 @@ def main(
 
         epoch += 1
 
-        save_image(adv_image, save_path)  # 存储对抗样本
-        save_image(patch, patch_path)  # 存储补丁
+        if not SAVE_PT:
+            save_image(adv_image, save_path)
+            save_image(patch, patch_path)
+        else:
+            torch.save(adv_image, pt_adv_save_path)
+            torch.save(patch, pt_patch_save_path)
         optimizer.step()
         # scheduler.step(loss)
 
@@ -197,8 +210,6 @@ def main(
     det_adv_image = detector.plot(adv_image, names, det, 0.5)  # 检测对抗样本
     save_image(det_adv_image, save_detpath)  # 存储检测结果
 
-    # 从命令行调用该文件，从标准输出当中读取输出结果，所以把结果print出来
-    # print('return', [os.path.abspath(save_path), os.path.abspath(save_detpath), os.path.abspath(patch_path)])
     return os.path.abspath(save_path), os.path.abspath(patch_path)
 
 

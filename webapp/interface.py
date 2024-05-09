@@ -1,25 +1,18 @@
 import os
 
+import torch
+
 from webapp.utils.utils import get_project_root
 
 os.chdir(get_project_root())
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 from torchvision.utils import save_image
 
 import gradio as gr
 from PyTorchYOLOv3.detect import DetectorYolov3
 from attack import main as attack_main
 from style_transfer import load_img
-from webapp.utils.CONSTANTS import ADV_DET_IMAGE_FOLDER
-from webapp.utils.CONSTANTS import ADV_IMAGE_FOLDER
-from webapp.utils.CONSTANTS import ATTACK_ID
-from webapp.utils.CONSTANTS import CLASS_NAMES
-from webapp.utils.CONSTANTS import DET_IMAGE_FOLDER
-from webapp.utils.CONSTANTS import GRADCAM_SAVE_FOLDER
-from webapp.utils.CONSTANTS import IMAGE_SIZE
-from webapp.utils.CONSTANTS import MASK_IMAGE_FOLDER
-from webapp.utils.CONSTANTS import PATCH_IMAGE_FOLDER
-from webapp.utils.CONSTANTS import STYLE_IMAGE_TIE1
-from webapp.utils.CONSTANTS import YOLOv3_MODEL_WEIGHTS_PATH
+from webapp.utils.CONSTANTS import *
 from webapp.utils.utils import delete_files
 from yolov3.main_gradcam import args as gradcam_args
 from yolov3.main_gradcam import main as gradcam_main
@@ -44,7 +37,7 @@ def wrapped_predict_image(image):
     global yolov3
     delete_files(DET_IMAGE_FOLDER)
     save_path = os.path.join(DET_IMAGE_FOLDER, os.path.basename(image))
-    loaded_image = load_img(image, IMAGE_SIZE)
+    loaded_image = load_img(image, IMAGE_SIZE).to(device)
     _, _, det, _, _ = yolov3.detect(input_imgs=loaded_image, cls_id_attacked=ATTACK_ID)
     detected_img = yolov3.plot(loaded_image, CLASS_NAMES, det, 0.5)
     save_image(detected_img, save_path)

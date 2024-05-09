@@ -44,7 +44,6 @@ parser.add_argument("--attack_weight", dest='attack_weight', nargs='?', type=flo
                     help="weight of attack loss", default=5e3)
 parser.add_argument('--mode', type=str, default='disappeared', help='untargeted/targeted/disappeared')
 
-
 args = parser.parse_args()
 
 
@@ -56,11 +55,11 @@ def main(
         PATCH_PATH=None,  # 最终补丁存储路径
         ADV_PATH=None,  # 最终对抗样本存储路径
         DET_PATH=None,  # 对抗样本检测效果存储路径
-        SAVE_PT=False   # 是否保存对抗样本张量
+        SAVE_PT=False  # 是否保存对抗样本张量
 ):
     style_img_path = STYLE_IMAGE
     content_img_path = item  # 传入图片的绝对路径
-    mask_path = MASK_IMAGE # 获取mask
+    mask_path = MASK_IMAGE  # 获取mask
     patch_path = PATCH_PATH  # 最终补丁存储路径
     save_path = ADV_PATH  # 最终对抗样本存储路径
     save_detpath = DET_PATH  # 对抗样本检测效果存储路径
@@ -162,16 +161,16 @@ def main(
                     save_image(patch, patch_path)
                 else:
                     torch.save(adv_image, pt_adv_save_path)
-                    torch.save(patch,pt_patch_save_path)
+                    torch.save(patch, pt_patch_save_path)
                 flag = 1
                 break
-            if (11 not in det[:,6]) and len(det[:,6])<maxl:
+            if (11 not in det[:, 6]) and len(det[:, 6]) < maxl:
                 if not SAVE_PT:
                     save_image(adv_image, save_path)
                     save_image(patch, patch_path)
                 else:
                     torch.save(adv_image, pt_adv_save_path)
-                    torch.save(patch,pt_patch_save_path)
+                    torch.save(patch, pt_patch_save_path)
                 flag = 1
                 break
 
@@ -214,7 +213,7 @@ def main(
 
 
 if __name__ == "__main__":
-    from webapp.utils.CONSTANTS import STOP_SIGNS_TRAIN_FOLDER
+    from webapp.utils.CONSTANTS import STOP_SIGN_TRAIN_FOLDER
     from webapp.utils.CONSTANTS import STYLE_IMAGE_TIE1
     from webapp.utils.CONSTANTS import MASK_IMAGE_FOLDER
     from webapp.utils.CONSTANTS import PATCH_IMAGE_FOLDER
@@ -224,7 +223,7 @@ if __name__ == "__main__":
 
     detectorYolov3 = DetectorYolov3(show_detail=False, tiny=True)
 
-    image_paths = get_image_paths(STOP_SIGNS_TRAIN_FOLDER)
+    image_paths = get_image_paths(STOP_SIGN_TRAIN_FOLDER)
 
     for image_path in image_paths:
         basename = os.path.basename(image_path)

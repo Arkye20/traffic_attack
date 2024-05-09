@@ -6,7 +6,7 @@ __pycache__
 
 /webapp/images/clear_images/*
 /webapp/images/clear_images3/*
-/webapp/images/gradcam_images/*
+/webapp/images/gradcam/*
 /webapp/images/stop_signs_train/*
 
 /webapp/images/attack_images/adv_img/*

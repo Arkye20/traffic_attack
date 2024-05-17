@@ -116,12 +116,13 @@ def main(img_path, model, SAVE_DIR=None, attack_range=220, saliency_class='stop 
         imgae_name = os.path.basename(img_path)  # 获取图片名
         if SAVE_DIR is None:
             save_path = f'{args.output_dir}{imgae_name[:-4]}/'
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
         else:
-            # save_path = f'{SAVE_DIR}{imgae_name[:-4]}/'
-            save_path = os.path.join(SAVE_DIR, os.path.splitext(imgae_name)[0])
-        # save_path = 'mask/'
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
+            # save_path = os.path.join(SAVE_DIR, os.path.splitext(imgae_name)[0])
+            save_path = SAVE_DIR
+
+
         # print(f'[INFO] Saving the final image at {save_path}')
         # 遍历每张图片中的每个目标
         for i, mask in enumerate(masks):

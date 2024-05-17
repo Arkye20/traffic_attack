@@ -1,3 +1,4 @@
+DEFAULT_SAVE_FOLDER = 'webapp/save'
 # 原始图片路径
 STOP_SIGN_TRAIN_FOLDER = 'webapp/images/stop_signs_train/'
 STOP_SIGN_TEST_FOLDER = 'webapp/images/stop_signs_test/'
@@ -5,7 +6,6 @@ STOP_SIGN_ALL_FOLDER = 'webapp/images/stop_signs_all/'
 STOP_SIGN_ALL_LABELS = 'webapp/images/stop_signs_label'
 TRAIN2017_FOLDER = 'webapp/images/train2017'
 
-SAVE_FOLDER = 'webapp/images/out3'
 
 TRAIN_ADV = 'webapp/images/attack_images/train_adv'
 VAL_ADV = 'webapp/images/attack_images/val_adv'
@@ -15,11 +15,11 @@ TEST_ADV = 'webapp/images/attack_images/test_adv'
 GRADCAM_SAVE_FOLDER = 'webapp/images/gradcam/'
 
 # 下面路径拼接好图片文件名之后，前端读取展示，或者输入到函数中
-MASK_IMAGE_FOLDER = 'webapp/images/gradcam/{}/mask.jpg'
-PATCH_IMAGE_FOLDER = 'webapp/images/attack_images/patch'
-ADV_IMAGE_FOLDER = 'webapp/images/attack_images/adv_img'
+MASK_IMAGE_FOLDER = DEFAULT_SAVE_FOLDER + '/{}/mask.jpg'
+PATCH_IMAGE_FOLDER = DEFAULT_SAVE_FOLDER
+ADV_IMAGE_FOLDER = DEFAULT_SAVE_FOLDER
 ADV_PT_FOLDER = 'webapp/images/attack_images/adv_pt'
-ADV_DET_IMAGE_FOLDER = 'webapp/images/attack_images/det_img'
+ADV_DET_IMAGE_FOLDER = DEFAULT_SAVE_FOLDER
 DET_IMAGE_FOLDER = 'webapp/images/attack_images/yolov3_clear_det'
 
 # 风格图片路径

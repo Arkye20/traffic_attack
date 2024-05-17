@@ -1,6 +1,8 @@
 import os
 import shutil
 
+import torch
+
 
 # 从任意py文件中获取当前项目的根路径
 def get_project_root():
@@ -26,4 +28,30 @@ def delete_files(folder):
         elif os.path.isdir(file_path):
             shutil.rmtree(file_path)
 
+# 将模型对对抗样本的预测结果维度增加到正常预测结果，空余行补0
+def equal_shape(clear_result, adv_result):
+    results = torch.zeros(clear_result.shape).to("cuda" if torch.cuda.is_available() else "cpu")
+    for i in adv_result:
+        for j in range(clear_result.shape[0]):
+            if i[-1] == clear_result[j][-1]:
+                results[j] = i
+                break
+    return results
+
+
+# 复制文件
+def copy_file(src_file, dst_folder):
+    file = os.path.basename(src_file)
+    dst_file = os.path.join(dst_folder, file)
+    shutil.copyfile(src_file, dst_file)
+
+def create_folder(save_folder, src_file):
+    file = os.path.splitext(os.path.basename(src_file))[0]
+    folder = os.path.join(save_folder, file)
+    try:
+        os.makedirs(folder)
+        return folder
+    except FileExistsError:
+        print("文件夹已存在，将不进行任何操作")
+        return folder
 

@@ -123,20 +123,22 @@ def save_labels(image_folder, save_folder):
             if det is None:
                 continue
             else:
-                torch.save(det[0], save_path)
-            # detected_img = yolov3.plot(loaded_image, CLASS_NAMES, det, 0.5)
-            # save_image(detected_img, save_path)
+                torch.save(det, save_path)
 
 
 if __name__ == '__main__':
+    save_labels(STOP_SIGN_ALL_FOLDER, STOP_SIGN_ALL_LABELS)
 
-    GradCamTest(STOP_SIGN_ALL_FOLDER, GRADCAM_SAVE_FOLDER)
+    # AdvDataset = AdversarialDataset(ADV_PT_FOLDER, STOP_SIGN_ALL_LABELS)
+    # data, label = AdvDataset[0]
+    # print(data, label)
 
 
+    # GradCamTest(STOP_SIGN_ALL_FOLDER, GRADCAM_SAVE_FOLDER)
     # AttackTest(
     #     image_folder=STOP_SIGN_ALL_FOLDER,
     #     mask_folder=MASK_IMAGE_FOLDER,
-    #     adv_folder=ADV_IMAGE_FOLDER,
+    #     adv_folder=ADV_PT_FOLDER,
     #     adv_det_folder=ADV_DET_IMAGE_FOLDER,
     #     patch_folder=PATCH_IMAGE_FOLDER,
     #     style_image=STYLE_IMAGE_TIE1,

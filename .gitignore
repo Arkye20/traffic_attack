@@ -4,14 +4,11 @@
 /PyTorchYOLOv3/weights/yolov3-tiny.weights
 __pycache__
 
-/webapp/images/clear_images/*
-/webapp/images/clear_images3/*
-/webapp/images/gradcam/*
-/webapp/images/stop_signs_train/*
+/webapp/images/*
+!/webapp/images/
+!/webapp/images/stop_signs_all
 
-/webapp/images/attack_images/adv_img/*
-/webapp/images/attack_images/det_img/*
-/webapp/images/attack_images/yolov3_clear_det/*
-/webapp/images/attack_images/patch/*
+webapp/save/*
+!webapp/save/
 
 /yolov3/temp.jpg

@@ -1,3 +1,4 @@
+import os.path
 from tkinter import Tk, filedialog
 
 from webapp.utils.CONSTANTS import *
@@ -13,7 +14,6 @@ from attack import main as attack_main
 from style_transfer import load_img
 from yolov3.main_gradcam import args as gradcam_args
 from yolov3.main_gradcam import main as gradcam_main
-from yolov3.main_gradcam import names as gradcam_names
 from yolov3.models.yolo_detector import YOLOV3TorchObjectDetector
 
 css = """
@@ -29,6 +29,8 @@ css = """
 """
 
 SAVE_FOLDER = DEFAULT_SAVE_FOLDER
+GRADCAM_METHOD = 'gradcam'
+SAVE_PT = False
 
 
 # 打开文件管理器，选择文件夹，返回文件夹路径
@@ -74,10 +76,17 @@ def wrapped_predict_image(image):
 # 生成攻击区域gradcam
 def wrapped_gradcam_main(image, attack):
     global gradcam_model
+    print(GRADCAM_METHOD)
     image_save_folder = create_folder(SAVE_FOLDER, image)
-    _, save_dir = gradcam_main(img_path=image, model=gradcam_model, SAVE_DIR=image_save_folder, attack_range=attack)
-    result_img = os.path.join(save_dir, "15_0.jpg")
-    mask = os.path.join(save_dir, "mask.jpg")
+    gradcam_main(
+        img_path=image,
+        model=gradcam_model,
+        SAVE_DIR=image_save_folder,
+        attack_range=attack,
+        gradcam_method=GRADCAM_METHOD
+    )
+    result_img = os.path.join(image_save_folder, f"15_0_{GRADCAM_METHOD}.jpg")
+    mask = os.path.join(image_save_folder, f"mask_{GRADCAM_METHOD}.jpg")
     return result_img, mask
 
 
@@ -88,31 +97,26 @@ def wrapped_attack_main(image, style=STYLE_IMAGE_TIE1):
         item=image,
         detectorYolov3=yolov3,
         STYLE_IMAGE=style,
-        MASK_IMAGE=MASK_IMAGE_FOLDER.format(os.path.splitext(basename)[0]),
+        MASK_IMAGE=SAVE_FOLDER + f"/{os.path.splitext(basename)[0]}/mask_{GRADCAM_METHOD}.jpg",
         PATCH_PATH=os.path.join(image_save_folder, 'patch.jpg'),
         ADV_PATH=os.path.join(image_save_folder, 'adv.jpg'),
-        DET_PATH=os.path.join(image_save_folder, 'adv_det.jpg')
+        DET_PATH=os.path.join(image_save_folder, 'adv_det.jpg'),
+        SAVE_PT=SAVE_PT
     )
     return adv_det_image_path, patch_image_path
 
 
-def wrapped_attack_main2(image, style=STYLE_IMAGE_TIE1):
-    delete_files(ADV_IMAGE_FOLDER)
-    delete_files(ADV_DET_IMAGE_FOLDER)
-    delete_files(PATCH_IMAGE_FOLDER)
-    delete_files(DET_IMAGE_FOLDER)
+def set_gradcam_method(method):
+    global GRADCAM_METHOD
+    if method == "Grad-CAM":
+        GRADCAM_METHOD = 'gradcam'
+    elif method == "Grad-CAM++":
+        GRADCAM_METHOD = 'gradcampp'
 
-    basename = os.path.basename(image)
-    adv_det_image_path, patch_image_path = attack_main(
-        item=image,
-        detectorYolov3=yolov3,
-        STYLE_IMAGE=style,
-        MASK_IMAGE=MASK_IMAGE_FOLDER.format(os.path.splitext(basename)[0]),
-        PATCH_PATH=os.path.join(PATCH_IMAGE_FOLDER, basename),
-        ADV_PATH=os.path.join(ADV_IMAGE_FOLDER, basename),
-        DET_PATH=os.path.join(ADV_DET_IMAGE_FOLDER, basename)
-    )
-    return adv_det_image_path, patch_image_path
+
+def set_save_pt(save):
+    global SAVE_PT
+    SAVE_PT = save
 
 
 # 前端页面代码
@@ -149,6 +153,18 @@ with gr.Blocks(css=css) as demo:
                                      interactive=False)
             save_folder_btn = gr.Button("浏览文件", min_width=1)
             save_folder_btn.click(on_browse, inputs=save_folder, outputs=save_folder, show_progress="hidden")
+        with gr.Row():
+            with gr.Column():
+                gradcam_method = gr.Radio(
+                    choices=["Grad-CAM", "Grad-CAM++"],
+                    label="Grad-CAM方法",
+                    info="生成攻击区域步骤的方法",
+                    container=True
+                )
+                gradcam_method.select(set_gradcam_method, inputs=gradcam_method)
+            with gr.Column():
+                save_pt = gr.Checkbox(label="是", container=True, info="保存对抗样本的张量")
+                save_pt.select(set_save_pt, inputs=save_pt)
 
 if __name__ == '__main__':
     # 加载原图检测模型
@@ -158,9 +174,9 @@ if __name__ == '__main__':
     input_size = (gradcam_args.img_size, gradcam_args.img_size)
     gradcam_model = YOLOV3TorchObjectDetector(
         YOLOv3_MODEL_WEIGHTS_PATH,
-        gradcam_args.device,
+        device,
         img_size=input_size,
-        names=gradcam_names
+        names=CLASS_NAMES
     )
 
     demo.launch(inbrowser=True)

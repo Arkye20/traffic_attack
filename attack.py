@@ -2,7 +2,6 @@ from __future__ import print_function
 
 import os
 
-import torch
 from torchvision.models import VGG19_Weights
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -156,19 +155,17 @@ def main(
         elif (args.mode == 'disappeared'):
             if det is None:
                 # 攻击成功 保存图片
-                if not SAVE_PT:
-                    save_image(adv_image, save_path)
-                    save_image(patch, patch_path)
-                else:
+                save_image(adv_image, save_path)
+                save_image(patch, patch_path)
+                if SAVE_PT:
                     torch.save(adv_image, pt_adv_save_path)
                     torch.save(patch, pt_patch_save_path)
                 flag = 1
                 break
             if (11 not in det[:, 6]) and len(det[:, 6]) < maxl:
-                if not SAVE_PT:
-                    save_image(adv_image, save_path)
-                    save_image(patch, patch_path)
-                else:
+                save_image(adv_image, save_path)
+                save_image(patch, patch_path)
+                if SAVE_PT:
                     torch.save(adv_image, pt_adv_save_path)
                     torch.save(patch, pt_patch_save_path)
                 flag = 1
@@ -188,16 +185,11 @@ def main(
             loss = loss_det * 10 + loss_fab * 10000 + content_score * 10 + style_score * 100
         loss.backward(retain_graph=True)
 
-        # print("epoch={} loss={} label = {}".format(epoch,loss_det,label))
-        # print("epoch={} loss_det={} loss_fab={} label = {} Style Loss: {:.4f} Content Loss: {:.4f}"
-        # .format(epoch,loss_det,loss_fab,label,style_score.data.item(), content_score.data.item()))
-
         epoch += 1
 
-        if not SAVE_PT:
-            save_image(adv_image, save_path)
-            save_image(patch, patch_path)
-        else:
+        save_image(adv_image, save_path)
+        save_image(patch, patch_path)
+        if SAVE_PT:
             torch.save(adv_image, pt_adv_save_path)
             torch.save(patch, pt_patch_save_path)
         optimizer.step()
@@ -213,26 +205,4 @@ def main(
 
 
 if __name__ == "__main__":
-    from webapp.utils.CONSTANTS import STOP_SIGN_TRAIN_FOLDER
-    from webapp.utils.CONSTANTS import STYLE_IMAGE_TIE1
-    from webapp.utils.CONSTANTS import MASK_IMAGE_FOLDER
-    from webapp.utils.CONSTANTS import PATCH_IMAGE_FOLDER
-    from webapp.utils.CONSTANTS import ADV_DET_IMAGE_FOLDER
-    from webapp.utils.CONSTANTS import ADV_IMAGE_FOLDER
-    from webapp.utils.utils import get_image_paths
-
-    detectorYolov3 = DetectorYolov3(show_detail=False, tiny=True)
-
-    image_paths = get_image_paths(STOP_SIGN_TRAIN_FOLDER)
-
-    for image_path in image_paths:
-        basename = os.path.basename(image_path)
-        main(
-            basename,
-            detectorYolov3,
-            STYLE_IMAGE=STYLE_IMAGE_TIE1,
-            MASK_IMAGE=MASK_IMAGE_FOLDER.format(os.path.splitext(basename)[0]),
-            PATCH_PATH=os.path.join(PATCH_IMAGE_FOLDER, basename),
-            ADV_PATH=os.path.join(ADV_IMAGE_FOLDER, basename),
-            DET_PATH=os.path.join(ADV_DET_IMAGE_FOLDER, basename)
-        )
+    pass

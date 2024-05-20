@@ -125,7 +125,7 @@ with gr.Blocks(css=css) as demo:
         with gr.Row():
             with gr.Column():
                 input_img = gr.Image(label="上传图像", type='filepath')
-                style = gr.Image(label="上传风格图像", type='filepath', value=STYLE_IMAGE_TIE1)
+                style = gr.Image(label="上传风格图像", type='filepath')
                 attack_param = gr.Slider(minimum=0, maximum=250, step=1, label="攻击区域", value=220)
 
             with gr.Column(elem_classes=["column2"]):

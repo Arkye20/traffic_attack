@@ -4,6 +4,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import random
 import argparse
 import numpy as np
+import torch
 from yolov3.models.gradcam import YOLOV3GradCAM, YOLOV3GradCAMPP
 from yolov3.models.yolo_detector import YOLOV3TorchObjectDetector
 import cv2

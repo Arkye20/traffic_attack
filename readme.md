@@ -12,12 +12,6 @@ yolov3/
 - patch.py（针对补丁相关操作，eg:patchApplier映射函数） 
 - PytorchYOLOv3/ 攻击的模型
   - detect.py 主要文件,涉及检测过程中的一些数据处理；DetectorYolov3()返回的数值用于攻击
-- gradio/
-  - gradcam_images 存放gradcam生成的图
-  - images & images3 存放原始图片
-  - style_images 存放风格图片
-  - attack_images 存放4.py生成的图片
-
 
 # 攻击文件（四）
 4.py(物理域攻击)
@@ -29,5 +23,7 @@ yolov3/
 - patch_path = f'{output_adv/patch/{imgae_name}.jpg'   补丁存储路径
 
 # 可视化界面文件
-interface.py
-  - 直接运行main
+webapp/interface.py
+- 运行main()函数，启动可视化界面
+webapp/images
+- 存放数据集图片
